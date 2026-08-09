@@ -1,4 +1,4 @@
-# 🛡️ Zoheb LLM Agent Toolkit
+# 🛡️ CyberForge LLM Security Agents
 
 A Python-based Cybersecurity LLM Agent Framework designed specifically for lab environments, virtual machine research, adversary emulation experiments, detection engineering, and purple team automation.
 
@@ -23,7 +23,7 @@ A Python-based Cybersecurity LLM Agent Framework designed specifically for lab e
 ## 📁 Repository Structure
 
 ```
-Zoheb LLM Agent/
+cyberforge-llm-security-agents/
 ├── .env.example              # Environment configuration template
 ├── config.py                 # Configuration manager
 ├── requirements.txt          # Python dependencies
@@ -55,41 +55,46 @@ Zoheb LLM Agent/
 
 ### 1. Prerequisites
 - Python 3.10+ installed.
-- A virtual environment (recommended).
+- Git installed.
+
+### 2. Windows Installation Steps
+```powershell
+# Clone repository
+git clone https://github.com/realzoheb/cyberforge-llm-security-agents.git
+cd cyberforge-llm-security-agents
+
+# Create and activate virtual environment
+python -m venv venv
+venv\Scripts\activate
+
+# Install required dependencies
+pip install -r requirements.txt
+```
 
 ### 3. Kali Linux (WSL) Setup & Execution
-
-In Kali WSL, Windows drives are mounted under `/mnt/`. Navigate to your project folder using:
-
 ```bash
-# 1. Open Kali WSL terminal and navigate to project folder
-cd "/mnt/d/Zoheb Notes/Zoheb LLM Agent"
+# Clone repository
+git clone https://github.com/realzoheb/cyberforge-llm-security-agents.git
+cd cyberforge-llm-security-agents
 
-# 2. Ensure Python venv is installed
+# Ensure Python venv is installed
 sudo apt update && sudo apt install -y python3-venv python3-pip
 
-# 3. Create and activate virtual environment
+# Create and activate virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
-# 4. Install dependencies
+# Install dependencies
 pip install -r requirements.txt
-
-# 5. Copy & configure .env file
-cp .env.example .env
-# Edit .env with nano/vim to insert your API key, or keep defaults for offline mock mode
-nano .env
-
-# 6. Test CLI execution
-python3 main.py list
-python3 main.py run hello_agents
 ```
 
-### 3. Environment Configuration
+### 4. Environment Configuration
 Copy `.env.example` to `.env` and fill in your API key for your preferred provider:
+
 ```bash
 cp .env.example .env
 ```
+
 Inside `.env`:
 ```env
 DEFAULT_LLM_PROVIDER=google
