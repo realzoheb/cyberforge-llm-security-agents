@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
 
 # Base Directory
@@ -19,6 +18,16 @@ class Config:
     # Gemini Settings
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
     GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+
+    # NVIDIA NIM Settings (OpenAI Compatible)
+    NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY", "")
+    NVIDIA_BASE_URL = os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1")
+    NVIDIA_MODEL = os.getenv("NVIDIA_MODEL", "meta/llama-3.1-70b-instruct")
+
+    # OpenCode / OpenRouter Settings (OpenAI Compatible)
+    OPENCODE_API_KEY = os.getenv("OPENCODE_API_KEY", "")
+    OPENCODE_BASE_URL = os.getenv("OPENCODE_BASE_URL", "https://openrouter.ai/api/v1")
+    OPENCODE_MODEL = os.getenv("OPENCODE_MODEL", "deepseek/deepseek-r1")
 
     # OpenAI Settings
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
