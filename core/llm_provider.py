@@ -1,10 +1,11 @@
 import os
 import json
+import urllib.request
 from typing import Dict, Any, Optional
 from config import Config
 
 class LLMProvider:
-    """Unified LLM Provider abstraction supporting Google Gemini, OpenAI, Anthropic, and Ollama."""
+    """Unified LLM Provider abstraction supporting Google Gemini, NVIDIA NIM, OpenCode, OpenAI, Anthropic, and Ollama."""
     
     def __init__(self, provider_type: Optional[str] = None):
         self.provider_type = (provider_type or Config.DEFAULT_PROVIDER).lower()
@@ -12,8 +13,17 @@ class LLMProvider:
     def generate(self, system_prompt: str, user_prompt: str, temperature: float = 0.2) -> str:
         """Generates a text completion based on prompt."""
         # 1. Check for local/mock response if no API key or placeholder API key is provided
-        placeholder_keys = ["your_gemini_api_key_here", "your_openai_api_key_here", "your_anthropic_api_key_here", ""]
+        placeholder_keys = [
+            "your_gemini_api_key_here", "your_openai_api_key_here", 
+            "your_anthropic_api_key_here", "your_nvidia_api_key_here", 
+            "your_opencode_api_key_here", ""
+        ]
+        
         if self.provider_type == "google" and Config.GEMINI_API_KEY in placeholder_keys:
+            return self._mock_response(system_prompt, user_prompt)
+        elif self.provider_type == "nvidia" and Config.NVIDIA_API_KEY in placeholder_keys:
+            return self._mock_response(system_prompt, user_prompt)
+        elif self.provider_type == "opencode" and Config.OPENCODE_API_KEY in placeholder_keys:
             return self._mock_response(system_prompt, user_prompt)
         elif self.provider_type == "openai" and Config.OPENAI_API_KEY in placeholder_keys:
             return self._mock_response(system_prompt, user_prompt)
@@ -24,6 +34,10 @@ class LLMProvider:
         try:
             if self.provider_type == "google":
                 return self._call_google(system_prompt, user_prompt, temperature)
+            elif self.provider_type == "nvidia":
+                return self._call_nvidia(system_prompt, user_prompt, temperature)
+            elif self.provider_type == "opencode":
+                return self._call_opencode(system_prompt, user_prompt, temperature)
             elif self.provider_type == "openai":
                 return self._call_openai(system_prompt, user_prompt, temperature)
             elif self.provider_type == "anthropic":
@@ -46,18 +60,50 @@ class LLMProvider:
             )
             return response.text
         except ImportError:
-            # Fallback to urllib if package not installed
             return self._mock_response(system_prompt, user_prompt)
 
+    def _call_nvidia(self, system_prompt: str, user_prompt: str, temperature: float) -> str:
+        url = f"{Config.NVIDIA_BASE_URL.rstrip('/')}/chat/completions"
+        return self._call_openai_compatible(
+            url=url,
+            api_key=Config.NVIDIA_API_KEY,
+            model=Config.NVIDIA_MODEL,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            temperature=temperature
+        )
+
+    def _call_opencode(self, system_prompt: str, user_prompt: str, temperature: float) -> str:
+        url = f"{Config.OPENCODE_BASE_URL.rstrip('/')}/chat/completions"
+        return self._call_openai_compatible(
+            url=url,
+            api_key=Config.OPENCODE_API_KEY,
+            model=Config.OPENCODE_MODEL,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            temperature=temperature
+        )
+
     def _call_openai(self, system_prompt: str, user_prompt: str, temperature: float) -> str:
-        import urllib.request
         url = "https://api.openai.com/v1/chat/completions"
+        return self._call_openai_compatible(
+            url=url,
+            api_key=Config.OPENAI_API_KEY,
+            model=Config.OPENAI_MODEL,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            temperature=temperature
+        )
+
+    def _call_openai_compatible(
+        self, url: str, api_key: str, model: str, system_prompt: str, user_prompt: str, temperature: float
+    ) -> str:
         headers = {
-            "Authorization": f"Bearer {Config.OPENAI_API_KEY}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
         data = {
-            "model": Config.OPENAI_MODEL,
+            "model": model,
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
@@ -70,7 +116,6 @@ class LLMProvider:
             return res["choices"][0]["message"]["content"]
 
     def _call_anthropic(self, system_prompt: str, user_prompt: str, temperature: float) -> str:
-        import urllib.request
         url = "https://api.anthropic.com/v1/messages"
         headers = {
             "x-api-key": Config.ANTHROPIC_API_KEY,
@@ -90,7 +135,6 @@ class LLMProvider:
             return res["content"][0]["text"]
 
     def _call_ollama(self, system_prompt: str, user_prompt: str, temperature: float) -> str:
-        import urllib.request
         url = f"{Config.OLLAMA_BASE_URL.rstrip('/')}/chat/completions"
         headers = {"Content-Type": "application/json"}
         data = {

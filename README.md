@@ -13,7 +13,7 @@ A Python-based Cybersecurity LLM Agent Framework designed specifically for lab e
 ## 🚀 Features
 
 - **Centralized Scenario CLI**: Easily list and execute named security scenarios (`hello_agents`, `log_analysis`, `purple_team`).
-- **Multi-Provider Support**: Pluggable provider architecture supporting **Google Gemini**, **OpenAI**, **Anthropic**, and local **Ollama** models (with deterministic fallback mode when API keys are omitted for offline lab testing).
+- **Multi-Provider Support**: Pluggable provider architecture supporting **Google Gemini**, **NVIDIA NIM**, **OpenCode / OpenRouter**, **OpenAI**, **Anthropic**, and local **Ollama** models (with deterministic fallback mode when API keys are omitted for offline lab testing).
 - **Modular Agents & Tasks**: Decoupled `BaseAgent` and `BaseTask` classes to quickly compose new roles (SOC Analyst, Detection Engineer, Purple Team Specialist).
 - **Lab Server Helpers**: Built-in simple HTTP and mock FTP server commands to simulate network traffic, file downloads, or exfiltration scenarios in VM setups.
 - **Jupyter Notebook Integration**: Built-in command to launch Jupyter notebooks exposed across network interfaces for VM testing.
@@ -32,7 +32,7 @@ cyberforge-llm-security-agents/
 │   ├── agent.py              # BaseAgent class definition
 │   ├── task.py               # BaseTask class definition
 │   ├── workflow.py           # Multi-agent workflow orchestrator
-│   └── llm_provider.py       # Unified Gemini / OpenAI / Anthropic / Ollama connector
+│   └── llm_provider.py       # Unified Gemini / NVIDIA / OpenCode / OpenAI / Anthropic connector
 ├── agents/                   # Pre-defined security agents
 │   └── security_agents.py    # Analyst, Detection Engineer, Purple Team agents
 ├── tasks/                    # Reusable security task modules
@@ -88,17 +88,35 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Environment Configuration
-Copy `.env.example` to `.env` and fill in your API key for your preferred provider:
+### 4. Environment Configuration (.env)
+Copy `.env.example` to `.env` and set your preferred provider:
 
 ```bash
 cp .env.example .env
 ```
 
-Inside `.env`:
+#### Provider Configuration Options inside `.env`:
+
+##### Option A: NVIDIA NIM API
+```env
+DEFAULT_LLM_PROVIDER=nvidia
+NVIDIA_API_KEY=your_nvidia_api_key_here
+NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
+NVIDIA_MODEL=meta/llama-3.1-70b-instruct
+```
+
+##### Option B: OpenCode / OpenRouter API
+```env
+DEFAULT_LLM_PROVIDER=opencode
+OPENCODE_API_KEY=your_opencode_api_key_here
+OPENCODE_BASE_URL=https://openrouter.ai/api/v1
+OPENCODE_MODEL=deepseek/deepseek-r1
+```
+
+##### Option C: Google Gemini API
 ```env
 DEFAULT_LLM_PROVIDER=google
-GEMINI_API_KEY=your_actual_gemini_api_key
+GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-2.5-flash
 ```
 
