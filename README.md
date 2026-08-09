@@ -1,0 +1,201 @@
+# 🛡️ Zoheb LLM Agent Toolkit
+
+A Python-based Cybersecurity LLM Agent Framework designed specifically for lab environments, virtual machine research, adversary emulation experiments, detection engineering, and purple team automation.
+
+---
+
+> [!CAUTION]
+> **SAFETY WARNING & LAB DISCLAIMER**  
+> This toolkit is designed **strictly for authorized testing, research, adversary emulation demos, and education in isolated virtual/lab environments**. Do not execute unauthorized actions or run against production systems.
+
+---
+
+## 🚀 Features
+
+- **Centralized Scenario CLI**: Easily list and execute named security scenarios (`hello_agents`, `log_analysis`, `purple_team`).
+- **Multi-Provider Support**: Pluggable provider architecture supporting **Google Gemini**, **OpenAI**, **Anthropic**, and local **Ollama** models (with deterministic fallback mode when API keys are omitted for offline lab testing).
+- **Modular Agents & Tasks**: Decoupled `BaseAgent` and `BaseTask` classes to quickly compose new roles (SOC Analyst, Detection Engineer, Purple Team Specialist).
+- **Lab Server Helpers**: Built-in simple HTTP and mock FTP server commands to simulate network traffic, file downloads, or exfiltration scenarios in VM setups.
+- **Jupyter Notebook Integration**: Built-in command to launch Jupyter notebooks exposed across network interfaces for VM testing.
+
+---
+
+## 📁 Repository Structure
+
+```
+Zoheb LLM Agent/
+├── .env.example              # Environment configuration template
+├── config.py                 # Configuration manager
+├── requirements.txt          # Python dependencies
+├── main.py                   # Central CLI application entry point
+├── core/                     # Agent & Task framework engine
+│   ├── agent.py              # BaseAgent class definition
+│   ├── task.py               # BaseTask class definition
+│   ├── workflow.py           # Multi-agent workflow orchestrator
+│   └── llm_provider.py       # Unified Gemini / OpenAI / Anthropic / Ollama connector
+├── agents/                   # Pre-defined security agents
+│   └── security_agents.py    # Analyst, Detection Engineer, Purple Team agents
+├── tasks/                    # Reusable security task modules
+│   └── security_tasks.py     # Log triage, Sigma generation, Emulation tasks
+├── scenarios/                # Registered lab scenario workflows
+│   ├── registry.py           # Central scenario registry
+│   ├── hello_agents.py       # Initial verification scenario
+│   ├── log_analysis_scenario.py
+│   └── purple_team_scenario.py
+├── servers/                  # Lab utility servers
+│   ├── http_server.py        # Local HTTP server helper
+│   └── ftp_server.py         # Mock FTP server helper
+└── notebooks/                # VM Jupyter notebook templates
+    └── 01_hello_agents.ipynb
+```
+
+---
+
+## 🛠️ Setup & Installation
+
+### 1. Prerequisites
+- Python 3.10+ installed.
+- A virtual environment (recommended).
+
+### 3. Kali Linux (WSL) Setup & Execution
+
+In Kali WSL, Windows drives are mounted under `/mnt/`. Navigate to your project folder using:
+
+```bash
+# 1. Open Kali WSL terminal and navigate to project folder
+cd "/mnt/d/Zoheb Notes/Zoheb LLM Agent"
+
+# 2. Ensure Python venv is installed
+sudo apt update && sudo apt install -y python3-venv python3-pip
+
+# 3. Create and activate virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# 4. Install dependencies
+pip install -r requirements.txt
+
+# 5. Copy & configure .env file
+cp .env.example .env
+# Edit .env with nano/vim to insert your API key, or keep defaults for offline mock mode
+nano .env
+
+# 6. Test CLI execution
+python3 main.py list
+python3 main.py run hello_agents
+```
+
+### 3. Environment Configuration
+Copy `.env.example` to `.env` and fill in your API key for your preferred provider:
+```bash
+cp .env.example .env
+```
+Inside `.env`:
+```env
+DEFAULT_LLM_PROVIDER=google
+GEMINI_API_KEY=your_actual_gemini_api_key
+GEMINI_MODEL=gemini-2.5-flash
+```
+
+*Note: If no API key is specified, the toolkit automatically runs in **Lab Mock Mode** so you can test scenario wiring offline!*
+
+---
+
+## 💻 Usage & CLI Guide
+
+### 1. List Available Scenarios
+```bash
+python main.py list
+```
+
+### 2. Run Scenarios by Name
+
+#### Hello Agents Demo Scenario
+Verify agent setup and connectivity:
+```bash
+python main.py run hello_agents
+```
+
+#### Log Triage & Detection Rule Pipeline
+Triage Sysmon process creation logs and generate a Sigma rule:
+```bash
+python main.py run log_analysis
+```
+
+#### Purple Team Emulation Exercise
+Plan ATT&CK T1059.001 adversary emulation tests, evaluate telemetry, and build rules:
+```bash
+python main.py run purple_team
+```
+
+---
+
+## 🌐 Lab Server Helpers
+
+### Run HTTP Test Server
+Used for serving test files or capturing simulated HTTP requests:
+```bash
+python main.py serve-http --host 0.0.0.0 --port 8080
+```
+
+### Run Mock FTP Server
+Used for network traffic simulation or mock file transfers:
+```bash
+python main.py serve-ftp --host 0.0.0.0 --port 2121
+```
+
+---
+
+## 📓 Jupyter Notebook VM Setup
+
+To run notebooks inside a Virtual Machine and access them from your host or lab network:
+```bash
+python main.py notebook --ip 0.0.0.0 --port 8888
+```
+
+---
+
+## ➕ Adding New Scenarios
+
+Adding a custom scenario takes 3 simple steps:
+
+1. **Define your workflow file in `scenarios/my_scenario.py`**:
+```python
+from core.workflow import Workflow
+from agents.security_agents import create_security_analyst
+from core.task import BaseTask
+
+def build_my_scenario() -> Workflow:
+    analyst = create_security_analyst()
+    task = BaseTask(
+        name="Custom Lab Task",
+        description="Analyze specific network packet metadata.",
+        agent=analyst
+    )
+    return Workflow("My Custom Scenario", "Description here", [task])
+```
+
+2. **Register it in `scenarios/__init__.py`**:
+```python
+from .my_scenario import build_my_scenario
+
+registry.register(
+    name="my_scenario",
+    description="Analyze custom network telemetry.",
+    builder_func=build_my_scenario
+)
+```
+
+3. **Run your new scenario**:
+```bash
+python main.py run my_scenario
+```
+
+---
+
+## ⚙️ Code Quality & Contribution Standards
+
+- **Type Hints**: Use standard Python `typing` annotations on functions and classes.
+- **PEP 8 Formatting**: Keep code readable and PEP 8 compliant.
+- **Modular Design**: Keep core logic in `core/`, agents in `agents/`, tasks in `tasks/`, and scenarios in `scenarios/`.
+- **Safety First**: Never embed real production keys or run malicious payloads.
