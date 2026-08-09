@@ -89,5 +89,13 @@ def start_notebook(ip, port):
     except KeyboardInterrupt:
         console.print("\nJupyter server stopped.")
 
+@cli.command(name="serve-web")
+@click.option("--host", default="127.0.0.1", help="Host address for Web GUI Dashboard.")
+@click.option("--port", default=5000, type=int, help="Port to run Web GUI Dashboard.")
+def serve_web(host, port):
+    """Launch interactive Web Application Dashboard at http://localhost:5000."""
+    from web_gui import run_web_gui
+    run_web_gui(host=host, port=port)
+
 if __name__ == "__main__":
     cli()
